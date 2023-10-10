@@ -1,0 +1,34 @@
+name: GoApplication
+on:
+  push:
+    branches: [ "main" ] #메인 브랜치에 push 발생시
+  pull_request:
+    branches: [ "main" ] #메인 브랜치에 pr 발생시
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: set up go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.15
+
+      - name: Build
+        run: go build -v ./...
+
+        #여기부턴 정해져있음
+      - name: Login To DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: eunhabaek
+          password: dckr_pat_8yzvOWHBI7-9c7ICPURepJQgxUM
+          
+      - name: build and release to DockerHub
+        env:
+          NAME: eunhabaek
+          REPO: goapp2
+        run: |
+          docker build -t $REPO:latest .
+          docker tag $REPO:latest $NAME/$REPO:latest
+          docker push $NAME/$REPO:latest
